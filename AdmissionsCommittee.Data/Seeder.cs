@@ -26,20 +26,44 @@ namespace AdmissionsCommittee.Data
             var specialty = await _unitOfWork.SpecialtyRepository.GetAllAsync();
             if (!specialty.Any())
             {
-                // await GenerateEieAsync();
-                // await GenerateRankAsync();
-                // await GenerateFacultyAsync();
+                await GenerateEieAsync();
+                await GenerateRankAsync();
+                await GenerateFacultyAsync();
 
-                //  await GenerateEmployeeAsync(30);
-                // await GenerateWorkingAsync();
+                await GenerateEmployeeAsync(30);
+                await GenerateWorkingAsync();
 
-                 // await GenerateApplicantAsync(60);
+                await GenerateApplicantAsync(60);
+                await GenerateApplicantMarksAsync();
 
-                // await GenerateSpecialtyAsync();
-                //await GenerateSpecialityCoefficientAsync();
+                await GenerateSpecialtyAsync();
+                await GenerateSpecialityCoefficientAsync();
                 await GenerateSpecialityStatisticsAsync();
                 await GenerateStatementAsync();
             }
+        }
+
+        private async Task GenerateApplicantMarksAsync()
+        {
+            _logger.LogInformation("Creating marks");
+            var marks = new List<Mark>();
+            var applicants = (await _unitOfWork.ApplicantRepository.GetAllAsync()).ToList();
+            var eies = (await _unitOfWork.EieRepository.GetAllAsync()).ToList();
+
+            applicants.ForEach(x =>
+            {
+                var currentYear = DateTime.Now.Year;
+                var fakeMarks = new Faker<Mark>()
+                .RuleFor(x => x.ApplicantId, x.ApplicantId)
+                .RuleFor(x => x.EieId, faker => faker.PickRandom(eies).EieId)
+                .RuleFor(x => x.WriteYear, faker => faker.Random.Int(currentYear - 3, currentYear))
+                .RuleFor(x => x.MarkValue, faker => faker.Random.Int(125, 200))
+                .Generate(3);
+                marks.AddRange(fakeMarks);
+            });
+
+            await _unitOfWork.MarkRepository.CreateManyAsync(marks);
+            _logger.LogInformation("Marks are created");
         }
 
         private async Task GenerateSpecialityStatisticsAsync()
@@ -60,7 +84,7 @@ namespace AdmissionsCommittee.Data
                 statistics.AddRange(fakeStatistics);
             });
             await _unitOfWork.StatisticRepository.CreateManyAsync(statistics);
-            _logger.LogInformation("Creating speciality's statistics");
+            _logger.LogInformation("Speciality's statistics are created");
         }
 
         private async Task GenerateSpecialityCoefficientAsync()

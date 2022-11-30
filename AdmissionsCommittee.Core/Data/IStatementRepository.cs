@@ -9,6 +9,8 @@ namespace AdmissionsCommittee.Core.Data
 {
     public interface IStatementRepository : IRepository<Statement>
     {
-        public Task<IEnumerable<Statement>> GetAllStatementsBySpecialityIdAsync(int specialityId);
+        public Task<IEnumerable<Statement>> GetAllSpecialityStatementsAsync(int specialityId);
+        public Task<IEnumerable<Statement>> GetApplicantStatementsAsync(int applicantId);
+
     }
 }

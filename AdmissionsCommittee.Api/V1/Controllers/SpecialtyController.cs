@@ -36,7 +36,7 @@ namespace AdmissionsCommittee.Api.V1.Controllers
             [FromQuery] SortFilter? sortFilter = null,
             [FromQuery] DynamicFilters? dynamicFilters = null)
         {
-            var statements = await _unitOfWork.StatementRepository.GetAllStatementsBySpecialityIdAsync(id);
+            var statements = await _unitOfWork.StatementRepository.GetAllSpecialityStatementsAsync(id);
             if(!statements.Any())
             {
                 return NotFound();

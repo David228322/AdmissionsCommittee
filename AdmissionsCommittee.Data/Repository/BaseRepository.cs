@@ -82,21 +82,6 @@ namespace AdmissionsCommittee.Data.Repository
             return result;
         }
 
-        //public async Task<IEnumerable<Lookup>> GetLookups()
-        //{
-        //    var query = new Query(TableName).Select(new[] { $"{TableName}Id", "Name" }).MySqlQueryToString();
-        //    var result = await Connection.QueryAsync<T, Lookup, Lookup>(query, (entity, lookup) =>
-        //    {
-        //        lookup.Id = (int)(entity.GetType().GetProperty($"{TableName}Id")?.GetValue(entity) ??
-        //                          throw new ArgumentException());
-        //        lookup.Name = (string)(entity.GetType().GetProperty(nameof(Lookup.Name))?.GetValue(entity) ??
-        //                               throw new ArgumentException());
-        //        return lookup;
-        //    });
-
-        //    return result;
-        //}
-
         public virtual async Task<IEnumerable<T>> PaginateAsync(PaginationFilter paginationFilter, SortFilter? sortFilter, DynamicFilters? dynamicFilters)
         {
             QueryBuilder.GetAllQuery = new Query(TableName);

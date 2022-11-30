@@ -42,6 +42,7 @@ builder.Services.AddScoped<IStatementRepository, StatementRepository>();
 builder.Services.AddScoped<IEieRepository, EieRepository>();
 builder.Services.AddScoped<IStatisticRepository, StatisticRepository>();
 builder.Services.AddScoped<ICoefficientRepository, CoefficientRepository>();
+builder.Services.AddScoped<IMarkRepository, MarkRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ISeeder, Seeder>();
 builder.Services.AddScoped<IQueryBuilder, QueryBuilder>();

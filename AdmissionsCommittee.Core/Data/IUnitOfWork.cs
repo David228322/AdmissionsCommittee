@@ -19,5 +19,6 @@ namespace AdmissionsCommittee.Core.Data
         public IEieRepository EieRepository { get; set; }
         public ICoefficientRepository CoefficientRepository { get; set; }
         public IStatisticRepository StatisticRepository { get; set; }
+        public IMarkRepository MarkRepository { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace AdmissionsCommittee.Data.Repository
         {
         }
 
-        public async Task<IEnumerable<Statement>> GetAllStatementsBySpecialityIdAsync(int specialityId)
+        public async Task<IEnumerable<Statement>> GetAllSpecialityStatementsAsync(int specialityId)
         {
 
             var statementColumn = $"{nameof(Statement.SpecialityId)}";
@@ -39,6 +39,30 @@ namespace AdmissionsCommittee.Data.Repository
                 statement.Speciality.Name = speciality.SpecialityName;
                 return statement;
             }, splitOn: $"{nameof(Person.PersonId)}, {nameof(Speciality.SpecialityId)}");
+            return statements;
+        }
+
+        public async Task<IEnumerable<Statement>> GetApplicantStatementsAsync(int applicantId)
+        {
+            var statementColumn = $"{nameof(Statement.ApplicantId)}";
+            var personTable = nameof(Person);
+            var specialityTable = nameof(Speciality);
+
+            var sql = new Query(TableName)
+                .Where($"{TableName}.{statementColumn}", "=", applicantId)
+                .Join(personTable, nameof(Person.PersonId), $"{TableName}.{nameof(Statement.ApplicantId)}")
+                .Join(specialityTable, $"{specialityTable}.{nameof(Speciality.SpecialityId)}", $"{TableName}.{nameof(Statement.SpecialityId)}");
+            var query = QueryBuilder.MsSqlQueryToString(sql);
+
+            var statements = await Connection.QueryAsync<Statement, Person, Speciality, Statement>(query,
+                (statement, person, speciality) =>
+                {
+                    statement.Applicant.Id = person.PersonId;
+                    statement.Applicant.Name = $"{person.FirstName} {person.SecondName}";
+                    statement.Speciality.Id = speciality.SpecialityId;
+                    statement.Speciality.Name = speciality.SpecialityName;
+                    return statement;
+                }, splitOn: $"{nameof(Person.PersonId)}, {nameof(Speciality.SpecialityId)}");
             return statements;
         }
     }
