@@ -75,17 +75,52 @@ namespace AdmissionsCommittee.Data.Repository
         {
             var facultyTableName = nameof(Faculty);
             var coefsTableName = nameof(Coefficient);
-            var eieTablename = nameof(Eie);
+            var eieTableName = nameof(Eie);
 
             var query = new Query(TableName)
                 .Join(facultyTableName, $"{facultyTableName}.{nameof(Faculty.FacultyId)}",
                     $"{TableName}.{nameof(Speciality.FacultyId)}")
                 .LeftJoin(coefsTableName, $"{coefsTableName}.{nameof(Coefficient.SpecialityId)}",
                     $"{TableName}.{nameof(Speciality.SpecialityId)}")
-                .LeftJoin(eieTablename, $"{eieTablename}.{nameof(Eie.EieId)}",
+                .LeftJoin(eieTableName, $"{eieTableName}.{nameof(Eie.EieId)}",
                     $"{coefsTableName}.{nameof(Coefficient.EieId)}");
 
             return query;
+        }
+
+        public async Task<CompetitiveScoreStatistic> CompareApplicantCompetitiveScore(int applicantCompetitiveScore, int specialityId)
+        {
+
+            var query = @"select AM.applicantid,
+               Round(Sum(SpecCoefs.coefficientvalue * AM.MarkValue / 3), 2) as 'CompetitiveScore'
+                from (select SpecialityId, CoefficientValue from Coefficient where SpecialityId = @specialityId) SpecCoefs
+                inner join (select S.SpecialityId, Mark.ApplicantId, Mark.MarkValue from Mark
+                inner join Statement on Mark.ApplicantId = Statement.ApplicantId
+                inner join Speciality S on S.SpecialityId = Statement.SpecialityId
+                where S.SpecialityId = @specialityId) AM on SpecCoefs.SpecialityId = AM.SpecialityId
+                group by AM.applicantid";
+            var values = new { specialityId = specialityId };
+            var applicantsCompetitiveScores = (await Connection.QueryAsync<ApplicantCompetitiveScore>(query, values, commandType: System.Data.CommandType.Text)).Select(x => x.CompetitiveScore).ToList();
+
+            var averageCompetitiveScore = applicantsCompetitiveScores.Average();
+            applicantsCompetitiveScores.Add(applicantCompetitiveScore);
+            
+            applicantsCompetitiveScores.Sort();
+            var position = applicantsCompetitiveScores.BinarySearch(applicantCompetitiveScore);
+
+            if (position == -1)
+            {
+                throw new Exception("Can't find rating of applicant competitive score");
+            }
+
+            var result = new CompetitiveScoreStatistic()
+            {
+                AverageCompetitiveScore = averageCompetitiveScore,
+                ApplicantCompetitiveScorePosition = position,
+                TotalApplicantsCount = applicantsCompetitiveScores.Count
+            };
+
+            return result;
         }
     }
 }

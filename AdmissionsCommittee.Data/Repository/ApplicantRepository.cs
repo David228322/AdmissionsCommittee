@@ -6,6 +6,7 @@ using Dapper;
 using SqlKata;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,6 +70,18 @@ namespace AdmissionsCommittee.Data.Repository
             }, splitOn: nameof(Person.PersonId));
 
             return applicants;
+        }
+
+        public async Task<float> CalculateApplicantCompetitiveScore(int applicantId, int specialityId)
+        {
+            // TODO: SEt values
+            var values = new { applicantId = applicantId, specialityId = specialityId };
+            var result = (await Connection.QueryAsync<float?>("SELECT dbo.CalculateApplicantCompetitiveScore(@applicantId, @specialityId)", new { applicantId = applicantId, specialityId = specialityId }, commandType: CommandType.Text)).Single();
+            if(!result.HasValue)
+            {
+                throw new ArgumentNullException("Marks or Speciality are incorrect");
+            }
+            return (float)result;
         }
     }
 }

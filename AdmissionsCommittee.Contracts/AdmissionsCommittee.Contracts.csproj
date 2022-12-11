@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="V1\Request\" />
+    <ProjectReference Include="..\AdmissionsCommittee.Core\AdmissionsCommittee.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AdmissionsCommittee.Core\AdmissionsCommittee.Core.csproj" />
+    <Folder Include="V1\Request\" />
   </ItemGroup>
 
 </Project>

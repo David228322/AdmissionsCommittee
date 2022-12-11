@@ -16,17 +16,13 @@ namespace AdmissionsCommittee.Data.Helpers
         public Query GetAllQuery { get; set; }
         public string TableName { get; set; }
 
-        public QueryBuilder()
-        {
-        }
-
         public virtual string PaginateFilter(PaginationFilter paginationFilter, SortFilter? sortFilter, DynamicFilters? dynamicFilters)
         {
             if (sortFilter?.Field is not null)
             {
                 AddSorting(sortFilter);
             }
-            else if (dynamicFilters?.Filters is not null)
+            else if (dynamicFilters?.Filters?.Count() > 0)
             {
                 AddFilter(dynamicFilters);
             }
@@ -47,7 +43,7 @@ namespace AdmissionsCommittee.Data.Helpers
 
         private void AddFilter(DynamicFilters filters)
         {
-            filters.Filters.ToList().ForEach(AddFilter);
+            filters.Filters?.ToList().ForEach(AddFilter);
         }
 
         private void AddFilter(DynamicFilter dynamicFilter)

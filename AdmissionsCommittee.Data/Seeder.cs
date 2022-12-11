@@ -34,7 +34,6 @@ namespace AdmissionsCommittee.Data
                 await GenerateWorkingAsync();
 
                 await GenerateApplicantAsync(60);
-                await GenerateApplicantMarksAsync();
 
                 await GenerateSpecialtyAsync();
                 await GenerateSpecialityCoefficientAsync();
@@ -43,24 +42,26 @@ namespace AdmissionsCommittee.Data
             }
         }
 
-        private async Task GenerateApplicantMarksAsync()
+        private async Task GenerateApplicantMarksAsync(IEnumerable<Statement> statements, IEnumerable<Coefficient> coefficients)
         {
             _logger.LogInformation("Creating marks");
-            var marks = new List<Mark>();
-            var applicants = (await _unitOfWork.ApplicantRepository.GetAllAsync()).ToList();
-            var eies = (await _unitOfWork.EieRepository.GetAllAsync()).ToList();
-
-            applicants.ForEach(x =>
+            var marks = new List<Mark>();        
+          
+            foreach (var statement in statements)
             {
-                var currentYear = DateTime.Now.Year;
-                var fakeMarks = new Faker<Mark>()
-                .RuleFor(x => x.ApplicantId, x.ApplicantId)
-                .RuleFor(x => x.EieId, faker => faker.PickRandom(eies).EieId)
-                .RuleFor(x => x.WriteYear, faker => faker.Random.Int(currentYear - 3, currentYear))
-                .RuleFor(x => x.MarkValue, faker => faker.Random.Int(125, 200))
-                .Generate(3);
-                marks.AddRange(fakeMarks);
-            });
+                var specialityCoeffs = coefficients.Where(x => x.SpecialityId == statement.SpecialityId);
+                foreach (var coef in specialityCoeffs)
+                {
+                    var currentYear = DateTime.Now.Year;
+                    var fakeMarks = new Faker<Mark>()
+                    .RuleFor(x => x.ApplicantId, statement.ApplicantId)
+                    .RuleFor(x => x.EieId, faker => coef.EieId)
+                    .RuleFor(x => x.WriteYear, faker => faker.Random.Int(currentYear - 3, currentYear))
+                    .RuleFor(x => x.MarkValue, faker => faker.Random.Int(125, 200))
+                    .Generate();
+                    marks.Add(fakeMarks);
+                }
+            }
 
             await _unitOfWork.MarkRepository.CreateManyAsync(marks);
             _logger.LogInformation("Marks are created");
@@ -154,17 +155,22 @@ namespace AdmissionsCommittee.Data
         private async Task GenerateStatementAsync()
         {
             _logger.LogInformation("Creating statements");
-            var persons = await _unitOfWork.PersonRepository.GetAllAsync();
-            var specialty = await _unitOfWork.SpecialtyRepository.GetAllAsync();
-            var statements = persons.Select(person =>
+            var applicants = await _unitOfWork.ApplicantRepository.GetAllAsync();
+            var specialtyCoeffs = await _unitOfWork.CoefficientRepository.GetAllAsync();
+
+            var statements = applicants.Select(person =>
             {
                 return new Faker<Statement>()
-                .RuleFor(x => x.ApplicantId, person.PersonId)
-                .RuleFor(x => x.SpecialityId, faker => faker.PickRandom(specialty).SpecialityId)
+                .RuleFor(x => x.ApplicantId, person.ApplicantId)
+                .RuleFor(x => x.SpecialityId, faker => faker.PickRandom(specialtyCoeffs).SpecialityId)
                 .Generate();
             });
+
             await _unitOfWork.StatementRepository.CreateManyAsync(statements);
+
             _logger.LogInformation("Statements are created");
+
+            await GenerateApplicantMarksAsync(statements, specialtyCoeffs);
         }
 
         private async Task GenerateApplicantAsync(int count)

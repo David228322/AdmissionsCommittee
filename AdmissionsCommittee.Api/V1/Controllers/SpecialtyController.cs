@@ -72,5 +72,15 @@ namespace AdmissionsCommittee.Api.V1.Controllers
             var response = _mapper.Map<IEnumerable<CoefficientResponse>>(coeffs);
             return Ok(response);
         }
+
+
+        [HttpGet("{id}/compare-competitive/{competitiveScore}")]
+        public async Task<IActionResult> CompareApplicantCompetitiveScore([FromRoute] int id, [FromRoute] int competitiveScore)
+        {
+            var applicantsCompetitiveScores = await _unitOfWork.SpecialtyRepository.CompareApplicantCompetitiveScore(competitiveScore, id);
+
+            var response = _mapper.Map<CompetitiveScoreStatisticResponse>(applicantsCompetitiveScores);
+            return Ok(response);
+        }
     }
 }

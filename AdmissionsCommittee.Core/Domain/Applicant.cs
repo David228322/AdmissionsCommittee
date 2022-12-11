@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace AdmissionsCommittee.Core.Domain
 {
-    // TODO: !!! create repos
     [Table(nameof(Applicant))]
     public class Applicant
     {

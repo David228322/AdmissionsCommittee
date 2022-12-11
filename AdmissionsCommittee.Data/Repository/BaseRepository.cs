@@ -92,28 +92,6 @@ namespace AdmissionsCommittee.Data.Repository
             return result;
         }
 
-        //private protected async Task<int> GetCount()
-        //{
-        //    var query = new Query(TableName).AsCount().MySqlQueryToString();
-        //    var result = await Connection.QueryFirstAsync<int>(query);
-        //    return result;
-        //}
-
-        //public async Task<bool> EntitiesAreExist(IEnumerable<int> ids, string idName)
-        //{
-        //    var query = new Query(nameof(Contact)).WhereIn(idName, ids)
-        //        .AsCount().MySqlQueryToString();
-
-        //    var contactsCount = (await Connection.QueryAsync<int>(query)).First();
-
-        //    if (ids.Count() != contactsCount)
-        //    {
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
         #region Dispose pattern
 
         private void ReleaseUnmanagedResources()

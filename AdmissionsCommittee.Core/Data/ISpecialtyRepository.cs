@@ -9,5 +9,6 @@ namespace AdmissionsCommittee.Core.Data
 {
     public interface ISpecialtyRepository : IRepository<Speciality>
     {
+        public Task<CompetitiveScoreStatistic> CompareApplicantCompetitiveScore(int applicantCompetitiveScore, int specialityId);
     }
 }
